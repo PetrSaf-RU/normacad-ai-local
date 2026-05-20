@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NormaCAD AI Local C#</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="blueprint" aria-hidden="true"></div>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-lockup">
+                <div class="brand-mark">
+                    <span>N</span>
+                </div>
+                <div>
+                    <div class="brand-title">NormaCAD <span>AI</span></div>
+                    <div class="brand-subtitle">локальный C# контур</div>
+                </div>
+            </div>
+
+            <div class="model-badge" id="serverPill">
+                <span class="live-dot"></span>
+                ASP.NET Core · Ollama · 127.0.0.1:11434
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="control-panel">
+                <div class="panel-head">
+                    <div>
+                        <p>Входные данные</p>
+                        <span>файл · путь · OCR</span>
+                    </div>
+                    <button class="philosopher-toggle" id="philosopherToggle" type="button" aria-pressed="false">
+                        <span class="orbit"></span>
+                        <span class="toggle-text">режим философа</span>
+                    </button>
+                </div>
+
+                <form id="askForm" class="ask-form" enctype="multipart/form-data">
+                    <input id="philosopherInput" name="philosopher_mode" type="hidden" value="0">
+
+                    <label class="dropzone" for="fileInput" id="dropzone">
+                        <input id="fileInput" name="file" type="file">
+                        <span class="drop-icon">+</span>
+                        <strong id="fileTitle">Загрузить файл</strong>
+                        <small id="fileMeta">текстовый файл или изображение для OCR</small>
+                    </label>
+
+                    <label class="path-row" for="localPathInput">
+                        <span>Путь на диске</span>
+                        <input
+                            id="localPathInput"
+                            name="local_path"
+                            type="text"
+                            autocomplete="off"
+                            placeholder="C:\Users\User\Documents\example.png"
+                        >
+                    </label>
+
+                    <label class="prompt-block" for="promptInput">
+                        <span>Промт</span>
+                        <textarea
+                            id="promptInput"
+                            name="prompt"
+                            rows="10"
+                            placeholder='Прочитай текст на картинке или измени файл: сделай 200 строк print("Hello World")'
+                        ></textarea>
+                    </label>
+
+                    <button class="submit-button" type="submit">
+                        <span class="button-light"></span>
+                        <span>Запустить Qwen</span>
+                    </button>
+                </form>
+            </section>
+
+            <section class="result-panel">
+                <div class="panel-head">
+                    <div>
+                        <p>Ответ</p>
+                        <span id="modelName">qwen2.5-coder:7b</span>
+                    </div>
+                    <div class="status-line waiting" id="statusLine">
+                        <span class="pulse-dot"></span>
+                        <span id="statusText">Ожидание запроса</span>
+                    </div>
+                </div>
+
+                <div class="task-progress" id="taskProgress" aria-live="polite">
+                    <div class="progress-meta">
+                        <span id="progressLabel">Готов к запуску</span>
+                        <strong id="progressValue">0%</strong>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-steps">
+                        <span>Файлы</span>
+                        <span>Ollama</span>
+                        <span>Qwen</span>
+                        <span>Ответ</span>
+                    </div>
+                </div>
+
+                <article class="answer-text" id="answerText"></article>
+
+                <div class="result-grid">
+                    <section class="mini-panel">
+                        <div class="mini-title">Источники</div>
+                        <div class="sources-list" id="sourcesList">
+                            <span class="empty-state">Нет источников</span>
+                        </div>
+                    </section>
+
+                    <section class="mini-panel generated-files-panel">
+                        <div class="mini-title">Сгенерированные файлы</div>
+                        <div class="files-list" id="filesList">
+                            <span class="empty-state">Файлы появятся здесь после генерации</span>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </main>
+
+        <img class="reference-ghost" src="/brand-reference.png" alt="">
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>
