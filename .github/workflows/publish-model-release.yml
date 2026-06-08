@@ -1,0 +1,76 @@
+name: Publish local Qwen model assets
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: models-v1
+      CHUNK_SIZE: "1900000000"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure release exists
+        run: |
+          gh release view "$RELEASE_TAG" >/dev/null 2>&1 || \
+            gh release create "$RELEASE_TAG" \
+              --target "${GITHUB_SHA}" \
+              --title "NormaCAD AI local Qwen models" \
+              --notes "Offline Ollama model assets for NormaCAD AI."
+
+      - name: Publish qwen2.5-coder 7B
+        shell: bash
+        run: |
+          set -euo pipefail
+          digest="60e05f2100071479f596b964f89f510f057ce397ea22f2833a0cfe029bfc2463"
+          prefix="qwen2.5-coder-7b"
+          mkdir -p release-assets
+          curl --fail --location --retry 5 \
+            "https://registry.ollama.ai/v2/library/qwen2.5-coder/blobs/sha256:${digest}" \
+            | split -b "$CHUNK_SIZE" -d -a 3 --numeric-suffixes=1 - "release-assets/${prefix}.part"
+          test "$(cat release-assets/* | sha256sum | cut -d' ' -f1)" = "$digest"
+          for asset in release-assets/*; do
+            name="$(basename "$asset")"
+            expected="$(jq -r --arg name "$name" \
+              '.models[].chunks[] | select(.name == $name) | .sha256' \
+              models/model-assets.json)"
+            echo "${expected}  ${asset}" | sha256sum --check -
+            for attempt in 1 2 3; do
+              gh release upload "$RELEASE_TAG" "$asset" --clobber && break
+              test "$attempt" -lt 3
+              sleep $((attempt * 15))
+            done
+          done
+          rm -rf release-assets
+
+      - name: Publish qwen2.5-vl 7B
+        shell: bash
+        run: |
+          set -euo pipefail
+          digest="a99b7f834d754b88f122d865f32758ba9f0994a83f8363df2c1e71c17605a025"
+          prefix="qwen2.5vl-7b"
+          mkdir -p release-assets
+          curl --fail --location --retry 5 \
+            "https://registry.ollama.ai/v2/library/qwen2.5vl/blobs/sha256:${digest}" \
+            | split -b "$CHUNK_SIZE" -d -a 3 --numeric-suffixes=1 - "release-assets/${prefix}.part"
+          test "$(cat release-assets/* | sha256sum | cut -d' ' -f1)" = "$digest"
+          for asset in release-assets/*; do
+            name="$(basename "$asset")"
+            expected="$(jq -r --arg name "$name" \
+              '.models[].chunks[] | select(.name == $name) | .sha256' \
+              models/model-assets.json)"
+            echo "${expected}  ${asset}" | sha256sum --check -
+            for attempt in 1 2 3; do
+              gh release upload "$RELEASE_TAG" "$asset" --clobber && break
+              test "$attempt" -lt 3
+              sleep $((attempt * 15))
+            done
+          done

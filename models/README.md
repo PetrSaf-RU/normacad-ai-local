@@ -31,6 +31,9 @@ gh release create models-v1 .\release-assets\* `
   --title "NormaCAD AI local models"
 ```
 
+Для публикации через GitHub runner без локальной передачи 10+ ГБ запустите
+workflow `Publish local Qwen model assets` в разделе Actions.
+
 Проверка GPU:
 
 ```powershell
