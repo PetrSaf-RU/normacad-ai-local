@@ -1,0 +1,4 @@
+models/ollama-bundle/blobs/** binary
+ocr/tessdata/*.traineddata binary
+test-data/*.png binary
+wwwroot/*.png binary

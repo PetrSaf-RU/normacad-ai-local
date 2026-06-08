@@ -67,7 +67,7 @@ static class AppSettings
     public const string TextModel = "qwen2.5-coder:7b";
     public const string VisionModel = "qwen2.5vl:7b";
     public const int TextContext = 4096;
-    public const int VisionContext = 2048;
+    public const int VisionContext = 8192;
     public const int NumBatch = 128;
     public const int MaxReadBytes = 2_000_000;
     public const int MaxContextChars = 9_000;
@@ -124,7 +124,7 @@ sealed class AssistantService
         _generatedRoot = Path.Combine(_mediaRoot, "generated");
         _preparedRoot = Path.Combine(_mediaRoot, "vision_prepared");
         var localTessdataRoot = Path.Combine(environment.ContentRootPath, "ocr", "tessdata");
-        _tessdataRoot = Directory.Exists(localTessdataRoot)
+        _tessdataRoot = File.Exists(Path.Combine(localTessdataRoot, "rus.traineddata"))
             ? localTessdataRoot
             : Path.Combine(_workspaceRoot, "ocr", "tessdata");
 
@@ -704,15 +704,9 @@ sealed class AssistantService
 
     private static string SelectOllamaModel(IEnumerable<FileInfoModel> files)
     {
-        var fileList = files.ToList();
-        if (fileList.Any(file => file.IsImage))
-        {
-            return fileList.Any(file => file.IsImage && !string.IsNullOrWhiteSpace(file.OcrText))
-                ? AppSettings.TextModel
-                : AppSettings.VisionModel;
-        }
-
-        return AppSettings.TextModel;
+        return files.Any(file => file.IsImage)
+            ? AppSettings.VisionModel
+            : AppSettings.TextModel;
     }
 
     private static List<FileInfoModel> TrimContextFiles(List<FileInfoModel> files, int totalLimit)

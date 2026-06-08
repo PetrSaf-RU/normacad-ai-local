@@ -1,0 +1,54 @@
+﻿{
+    "schema_version":  1,
+    "models":  [
+                   {
+                       "chunks":  [
+                                      {
+                                          "sha256":  "c4a640ae6acf32ff34ba978e6ea25e719025ec4ffc57a0fd2b0c881e1e2c9261",
+                                          "name":  "qwen2.5-coder-7b.part001",
+                                          "size":  1900000000
+                                      },
+                                      {
+                                          "sha256":  "43aca48462f16de471b17200f4a030c6b5b93cf66d01ad86a23e8c5991ea5c20",
+                                          "name":  "qwen2.5-coder-7b.part002",
+                                          "size":  1900000000
+                                      },
+                                      {
+                                          "sha256":  "5fcd689b76ece90cbb3d32aefabcb26dfc1eeadea737ad635129f3b14d0b56cc",
+                                          "name":  "qwen2.5-coder-7b.part003",
+                                          "size":  883074048
+                                      }
+                                  ],
+                       "name":  "qwen2.5-coder:7b",
+                       "digest":  "60e05f2100071479f596b964f89f510f057ce397ea22f2833a0cfe029bfc2463",
+                       "size":  4683074048
+                   },
+                   {
+                       "chunks":  [
+                                      {
+                                          "sha256":  "600e105cab0293bdd3a01e1ef70dba3a523bfe51ddda57d807e370dfb0dffd2a",
+                                          "name":  "qwen2.5vl-7b.part001",
+                                          "size":  1900000000
+                                      },
+                                      {
+                                          "sha256":  "fb6c176c70c851e3f2210a16a1c2cf9b21c8b51ce0ae4c1300897aff743b2014",
+                                          "name":  "qwen2.5vl-7b.part002",
+                                          "size":  1900000000
+                                      },
+                                      {
+                                          "sha256":  "602b7e8c4592976eb76bacc618f974e52fbe36702bdd3cdbeaebb61be0101654",
+                                          "name":  "qwen2.5vl-7b.part003",
+                                          "size":  1900000000
+                                      },
+                                      {
+                                          "sha256":  "1ad6545585c75cd2e02b6ef0e1c9a00a312cff4b25bfb5339f819e288d0781e9",
+                                          "name":  "qwen2.5vl-7b.part004",
+                                          "size":  269233408
+                                      }
+                                  ],
+                       "name":  "qwen2.5vl:7b",
+                       "digest":  "a99b7f834d754b88f122d865f32758ba9f0994a83f8363df2c1e71c17605a025",
+                       "size":  5969233408
+                   }
+               ]
+}

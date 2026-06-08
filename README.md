@@ -30,6 +30,37 @@
 
 ## Установка .NET
 
+## Быстрая установка
+
+Репозиторий включает исходники, OCR-словари и установщик локальных моделей.
+Запустите PowerShell:
+
+```powershell
+git clone https://github.com/PetrSaf-RU/normacad-ai-local.git
+cd normacad-ai-local
+Set-ExecutionPolicy -Scope Process Bypass
+.\setup.ps1
+.\start.ps1
+```
+
+`setup.ps1`:
+
+1. Устанавливает недостающие .NET 10, Ollama и Tesseract через `winget`.
+2. Загружает части Qwen из GitHub Release `models-v1`.
+3. Проверяет SHA-256 и восстанавливает локальное хранилище Ollama.
+4. Собирает C# backend.
+
+Необходимо около 15 ГБ свободного места. После установки сайт и AI работают
+локально; облачные API не используются.
+
+Альтернатива без model release:
+
+```powershell
+.\setup.ps1 -UseOllamaRegistry
+```
+
+В этом режиме модели загружаются командой `ollama pull`.
+
 ```powershell
 winget install Microsoft.DotNet.SDK.10
 ```
@@ -59,7 +90,10 @@ winget install Ollama.Ollama
 - `qwen2.5-coder:7b` — основной текстовый model
 - `qwen2.5vl:7b` — fallback для изображений без OCR
 
-Весовые файлы Qwen не включены в репозиторий: они весят несколько гигабайт, и GitHub не подходит для хранения моделей. Скрипт выше скачивает их локально через Ollama.
+Весовые файлы Qwen опубликованы как разбитые assets в GitHub Release
+`models-v1`, поскольку Git не принимает файлы больше 100 МБ. Скрипт
+`models/install-local-ai.ps1` собирает их локально. Скрипт
+`models/ollama-pull.ps1` остается запасным способом установки.
 
 Для GPU на Windows можно задать переменные окружения перед запуском Ollama:
 
@@ -92,7 +126,7 @@ winget install UB-Mannheim.TesseractOCR
 ocr\tessdata
 ```
 
-Нужны файлы:
+Нужные OCR-словари уже включены в репозиторий:
 
 ```text
 eng.traineddata

@@ -1,17 +1,35 @@
 # Models
 
-Файлы весов Qwen не лежат в репозитории: модель весит несколько гигабайт, а GitHub не подходит для хранения таких артефактов.
+NormaCAD AI использует две локальные модели:
 
-Для локального запуска используйте Ollama:
+- `qwen2.5-coder:7b` — текст, код и содержимое файлов;
+- `qwen2.5vl:7b` — изображения и технические чертежи.
+
+Большие model blobs опубликованы в GitHub Release `models-v1`. Они разбиты
+на части меньше лимита GitHub Release и восстанавливаются установщиком с
+обязательной проверкой SHA-256:
+
+```powershell
+.\models\install-local-ai.ps1
+```
+
+Установщик не обращается к облачному AI API. После установки inference
+выполняется локально через Ollama.
+
+Альтернативная установка напрямую из Ollama Registry:
 
 ```powershell
 .\models\ollama-pull.ps1
 ```
 
-По умолчанию будут загружены:
+Для создания нового model release из уже установленного Ollama:
 
-- `qwen2.5-coder:7b` — основной текстовый и code/file model
-- `qwen2.5vl:7b` — fallback для изображений без OCR
+```powershell
+.\tools\package-ollama-models.ps1
+gh release create models-v1 .\release-assets\* `
+  --repo PetrSaf-RU/normacad-ai-local `
+  --title "NormaCAD AI local models"
+```
 
 Проверка GPU:
 

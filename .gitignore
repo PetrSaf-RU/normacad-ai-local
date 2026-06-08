@@ -10,8 +10,9 @@ standards/db/
 standards/downloads/
 standards/inbox/*
 !standards/inbox/.gitkeep
-ocr/tessdata/*.traineddata
-!ocr/tessdata/.gitkeep
+release-assets/
+model-install-test/
+test-data/*_response.json
 wwwroot/media/uploads/*
 wwwroot/media/generated/*
 wwwroot/media/vision_prepared/*

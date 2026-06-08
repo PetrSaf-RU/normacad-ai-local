@@ -5,21 +5,22 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$ollama = Get-Command ollama -ErrorAction SilentlyContinue
-if (-not $ollama) {
+$ollamaCommand = Get-Command ollama -ErrorAction SilentlyContinue
+$ollamaPath = if ($ollamaCommand) { $ollamaCommand.Source } else { $null }
+if (-not $ollamaPath) {
     $defaultPath = "$env:LOCALAPPDATA\Programs\Ollama\ollama.exe"
     if (Test-Path $defaultPath) {
-        $ollama = Get-Item $defaultPath
+        $ollamaPath = $defaultPath
     } else {
         throw "Ollama не найден. Установите Ollama: https://ollama.com/download"
     }
 }
 
 Write-Host "Pulling text model: $TextModel"
-& $ollama.Source pull $TextModel
+& $ollamaPath pull $TextModel
 
 Write-Host "Pulling vision model: $VisionModel"
-& $ollama.Source pull $VisionModel
+& $ollamaPath pull $VisionModel
 
 Write-Host "Available models:"
-& $ollama.Source list
+& $ollamaPath list
