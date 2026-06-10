@@ -165,6 +165,16 @@ sealed class AssistantService
 
             var (model, rawAnswer) = await AskOllamaAsync(prompt, contextFiles, philosopherMode);
             var (answer, aiFiles) = ParseAiResponse(rawAnswer, contextFiles, prompt);
+            if (ShouldRetryDrawingAnalysis(prompt, contextFiles, answer))
+            {
+                var retryPrompt = BuildDrawingAnalysisRetryPrompt(prompt);
+                (model, rawAnswer) = await AskOllamaAsync(retryPrompt, contextFiles, true);
+                (answer, aiFiles) = ParseAiResponse(rawAnswer, contextFiles, retryPrompt);
+            }
+            if (ShouldRetryDrawingAnalysis(prompt, contextFiles, answer))
+            {
+                answer = BuildDrawingAnalysisFallback(contextFiles, answer);
+            }
             var generatedFiles = await SaveGeneratedFilesAsync(aiFiles);
 
             return ApiResult.Json(new AskResponse(
@@ -790,6 +800,7 @@ sealed class AssistantService
             "Если часть фото неразборчива, явно назови только эту часть, а не отказывайся читать всю картинку. " +
             "Если в контексте есть OCR-текст, считай его уже распознанным текстом с фотографии и отвечай по нему. " +
             "Не отвечай общим отказом про невозможность распознавания, если OCR-текст непустой; выбери наиболее вероятный фрагмент или дай лучшие кандидаты. " +
+            "Никогда не повторяй пользовательский промт вместо результата. Для технического чертежа ответ должен содержать наблюдения, размеры или обозначения, возможные нарушения с evidence и отметку о необходимости human review. Если нарушение не подтверждается изображением, явно назови его кандидатом, а не фактом. " +
             "Если в запрос добавлен блок локальной базы ГОСТ/ЕСКД, используй его как главный нормативный источник для анализа чертежей, размеров, линий, шрифтов, масштабов, основной надписи, обозначений и технических требований. Ссылайся на обозначение стандарта и фрагмент. Нельзя придумывать номера пунктов, таблиц или приложений: если номер пункта не указан в найденном фрагменте, напиши, что номер пункта в базе не найден. " +
             "Отвечай на русском, если пользователь не попросил другой язык. " +
             modeLine + " " +
@@ -813,6 +824,75 @@ sealed class AssistantService
             ? ""
             : $"\n\nБаза ГОСТ/ЕСКД:\n```text\n{standardsContext}\n```";
         return $"Запрос пользователя:\n{prompt}\n\nФайлы и локальные источники:\n{BuildFileBlock(files)}{standardsBlock}{fileInstruction}";
+    }
+
+    private static bool ShouldRetryDrawingAnalysis(
+        string prompt,
+        List<FileInfoModel> files,
+        string answer
+    )
+    {
+        if (!files.Any(file => file.IsImage))
+        {
+            return false;
+        }
+
+        var request = prompt.ToLowerInvariant();
+        var isDrawingRequest = new[]
+        {
+            "чертеж", "чертёж", "ескд", "cad", "drawing", "violation", "наруш"
+        }.Any(request.Contains);
+        if (!isDrawingRequest)
+        {
+            return false;
+        }
+
+        var normalizedAnswer = Regex.Replace(answer.ToLowerInvariant(), @"\s+", " ").Trim();
+        var normalizedPrompt = Regex.Replace(prompt.ToLowerInvariant(), @"\s+", " ").Trim();
+        var hasEvidence = new[]
+        {
+            "размер", "диаметр", "вид", "разрез", "линия", "обознач",
+            "наруш", "evidence", "severity", "human review"
+        }.Count(normalizedAnswer.Contains) >= 3;
+
+        return normalizedAnswer.Length < 300
+            || normalizedAnswer == normalizedPrompt
+            || !hasEvidence;
+    }
+
+    private static string BuildDrawingAnalysisRetryPrompt(string originalPrompt)
+    {
+        return originalPrompt +
+            "\n\nПредыдущий ответ был недостаточно подробным. Повтори анализ самого изображения, не повторяй промт. " +
+            "Ответ должен быть не короче 500 символов и содержать разделы: " +
+            "1) Наблюдения; 2) Виды и разрезы; 3) Размеры и обозначения; " +
+            "4) Возможные нарушения. Для каждого кандидата укажи severity, evidence, confidence и human_review_required=true. " +
+            "Если нарушение нельзя подтвердить, прямо укажи неопределенность. Не придумывай номер ГОСТа.";
+    }
+
+    private static string BuildDrawingAnalysisFallback(
+        List<FileInfoModel> files,
+        string modelAnswer
+    )
+    {
+        var ocrText = string.Join(
+            "\n",
+            files.Where(file => file.IsImage && !string.IsNullOrWhiteSpace(file.OcrText))
+                .Select(file => file.OcrText)
+        );
+        var ocrBlock = string.IsNullOrWhiteSpace(ocrText)
+            ? "OCR-текст не получен."
+            : $"OCR-фрагмент:\n{ocrText}";
+
+        return "Автоматический vision-анализ не сформировал достаточно подробный и проверяемый результат. " +
+            "Не следует считать короткий ответ подтвержденным заключением.\n\n" +
+            $"{ocrBlock}\n\n" +
+            "Возможное нарушение:\n" +
+            "- severity: warning\n" +
+            "- evidence: результат vision-модели недостаточен для подтверждения геометрии и оформления\n" +
+            "- confidence: low\n" +
+            "- human_review_required: true\n\n" +
+            $"Последний ответ модели: {modelAnswer}";
     }
 
     private (string Answer, List<AiFile> Files) ParseAiResponse(string rawResponse, List<FileInfoModel> files, string prompt)
