@@ -1,0 +1,36 @@
+{
+  "drawing_summary": {
+    "drawing_type": "technical",
+    "subject": "short drawing subject",
+    "views": ["front", "section"],
+    "complexity": "high"
+  },
+  "observed_entities": [
+    {
+      "entity": "component name",
+      "evidence": "visible feature or exact short label",
+      "location": "sheet region or coordinates",
+      "confidence": 0.8
+    }
+  ],
+  "dimensions_and_designations": [
+    {
+      "text": "visible dimension or designation",
+      "location": "sheet region or coordinates",
+      "confidence": 0.8
+    }
+  ],
+  "possible_violations": [
+    {
+      "category": "dimensioning",
+      "description": "candidate issue, not a confirmed defect",
+      "evidence": "specific visible evidence",
+      "severity": "warning",
+      "confidence": 0.6,
+      "human_review_required": true
+    }
+  ],
+  "uncertainties": [
+    "uncertain OCR reading or interpretation"
+  ]
+}
