@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NormaCAD normalized drawing analysis report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "reports",
+    "drawings",
+    "entities",
+    "dimensions",
+    "issues",
+    "uncertainties",
+    "provenance",
+    "pipeline",
+    "quality_gate",
+    "review",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": { "const": "2.0" },
+    "reports": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "sample_id",
+          "source_file_name",
+          "source_url",
+          "document_class",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "sample_id": { "type": "string", "minLength": 1 },
+          "source_file_name": { "type": "string", "minLength": 1 },
+          "source_url": { "type": "string" },
+          "document_class": { "type": "string", "minLength": 1 },
+          "status": {
+            "enum": [
+              "human_review_required",
+              "approved",
+              "rejected",
+              "superseded"
+            ]
+          },
+          "created_at": { "type": "string", "format": "date-time" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "drawings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "report_id",
+          "drawing_type",
+          "subject",
+          "complexity"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "report_id": { "type": "string", "minLength": 1 },
+          "drawing_type": { "type": "string", "minLength": 1 },
+          "subject": { "type": "string", "minLength": 1 },
+          "complexity": {
+            "enum": ["low", "medium", "high", "very_high"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "report_id",
+          "name",
+          "evidence",
+          "location",
+          "confidence"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "report_id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 },
+          "location": { "type": "string", "minLength": 1 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "dimensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "report_id", "text", "location", "confidence"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "report_id": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 },
+          "location": { "type": "string", "minLength": 1 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "report_id",
+          "category",
+          "description",
+          "evidence",
+          "severity",
+          "confidence",
+          "human_review_required"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "report_id": { "type": "string", "minLength": 1 },
+          "category": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 },
+          "severity": { "enum": ["info", "warning", "error"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "human_review_required": { "const": true }
+        },
+        "additionalProperties": false
+      }
+    },
+    "uncertainties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "report_id", "text"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "report_id": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "provenance": { "type": "object" },
+    "pipeline": { "type": "object" },
+    "second_model_review": { "type": ["object", "null"] },
+    "quality_gate": { "type": "object" },
+    "review": { "type": "object" },
+    "artifacts": { "type": "object" }
+  }
+}

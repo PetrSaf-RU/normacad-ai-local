@@ -251,7 +251,22 @@ tools/                       automation scripts
 models/                      Ollama model pull script
 standards/catalog/           manifests
 standards/inbox/             local standards input folder
+training-pipeline/            local two-model dataset preparation and review
+compat/legacy-ai-json-v2/     schema v2 adapter for older local AI installs
 ```
+
+## JSON v2 и совместимость со старой локальной ИИ
+
+Актуальный pipeline формирует нормализованные коллекции `reports`, `drawings`,
+`entities`, `dimensions`, `issues` и `uncertainties`. Все дочерние записи
+связаны через `report_id`, а каждое предполагаемое нарушение требует проверки
+человеком.
+
+Старые веса Qwen переобучать не обязательно. Папка
+`compat/legacy-ai-json-v2` содержит prompt-шаблон и PowerShell-адаптер, который
+вызывает старую Ollama vision-модель и преобразует прежний вложенный ответ в
+JSON v2. Инструкции находятся в
+`compat/legacy-ai-json-v2/README.md`.
 
 ## Публикация на GitHub
 
