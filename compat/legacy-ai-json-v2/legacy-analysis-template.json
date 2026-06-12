@@ -27,6 +27,14 @@
       "evidence": "specific visible evidence",
       "severity": "warning",
       "confidence": 0.6,
+      "standard_reference": {
+        "standard_code": "ГОСТ 2.303-68",
+        "title": "ЕСКД. Линии",
+        "source_url": "https://protect.gost.ru/gost/details/09645eb7-ee23-467a-a319-25b3112a7227",
+        "evidence_status": "metadata_only",
+        "clause_number": null,
+        "source_quote_short": null
+      },
       "human_review_required": true
     }
   ],

@@ -21,6 +21,7 @@ foreach ($item in $items) {
     }
 
     $target = Join-Path $OutDir $item.FileName
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $target) | Out-Null
     Write-Host "Downloading $($item.Url) -> $target"
     Invoke-WebRequest -Uri $item.Url -OutFile $target
 }

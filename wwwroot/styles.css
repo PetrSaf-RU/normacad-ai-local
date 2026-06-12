@@ -216,67 +216,6 @@ body {
     overflow-wrap: anywhere;
 }
 
-.philosopher-toggle {
-    position: relative;
-    flex: 0 0 auto;
-    min-height: 42px;
-    max-width: 210px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 13px;
-    border: 1px solid rgba(245, 158, 11, 0.34);
-    border-radius: 999px;
-    color: #ffdca8;
-    background: rgba(245, 158, 11, 0.08);
-    font-size: 12px;
-    font-weight: 850;
-    text-transform: uppercase;
-    cursor: pointer;
-    overflow: hidden;
-    transition: border-color 180ms ease, color 180ms ease, background 180ms ease, transform 180ms ease;
-}
-
-.philosopher-toggle:hover {
-    transform: translateY(-1px);
-    border-color: rgba(245, 158, 11, 0.78);
-}
-
-.philosopher-toggle.is-active {
-    color: #10161d;
-    background: linear-gradient(135deg, #facc15, #fb923c);
-    box-shadow: 0 0 34px rgba(245, 158, 11, 0.28);
-}
-
-.orbit {
-    position: relative;
-    width: 18px;
-    height: 18px;
-    border: 1px solid currentColor;
-    border-radius: 50%;
-}
-
-.orbit::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-    transform: translate(-50%, -50%);
-}
-
-.philosopher-toggle.is-active .orbit {
-    animation: orbitTurn 1.8s linear infinite;
-}
-
-.toggle-text {
-    min-width: 0;
-    overflow-wrap: anywhere;
-}
-
 .ask-form {
     display: grid;
     gap: 14px;
@@ -709,12 +648,6 @@ textarea:focus {
     }
 }
 
-@keyframes orbitTurn {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
 @media (max-width: 980px) {
     .workspace,
     .result-grid {
@@ -738,7 +671,6 @@ textarea:focus {
     }
 
     .model-badge,
-    .philosopher-toggle,
     .status-line {
         width: 100%;
         justify-content: center;

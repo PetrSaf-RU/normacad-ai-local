@@ -88,6 +88,15 @@ foreach ($item in @($legacy.possible_violations)) {
     if ($item.severity -notin @("info", "warning", "error")) {
         throw "Invalid severity at possible_violations[$index]"
     }
+    if (-not $item.standard_reference) {
+        throw "Missing standard_reference at possible_violations[$index]"
+    }
+    foreach ($field in "standard_code", "title", "source_url", "evidence_status") {
+        Require-Value $item.standard_reference.$field "possible_violations[$index].standard_reference.$field"
+    }
+    if ($item.standard_reference.source_url -notmatch '^https://protect\.gost\.ru/') {
+        throw "Invalid official GOST URL at possible_violations[$index]"
+    }
     $issues += [ordered]@{
         id = "$SampleId-issue-$('{0:D3}' -f $index)"
         report_id = $reportId
@@ -96,6 +105,14 @@ foreach ($item in @($legacy.possible_violations)) {
         evidence = [string]$item.evidence
         severity = [string]$item.severity
         confidence = Parse-Confidence $item.confidence "possible_violations[$index]"
+        standard_reference = [ordered]@{
+            standard_code = [string]$item.standard_reference.standard_code
+            title = [string]$item.standard_reference.title
+            source_url = [string]$item.standard_reference.source_url
+            evidence_status = [string]$item.standard_reference.evidence_status
+            clause_number = $item.standard_reference.clause_number
+            source_quote_short = $item.standard_reference.source_quote_short
+        }
         human_review_required = $true
     }
 }

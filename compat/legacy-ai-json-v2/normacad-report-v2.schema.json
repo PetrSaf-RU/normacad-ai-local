@@ -126,6 +126,7 @@
           "evidence",
           "severity",
           "confidence",
+          "standard_reference",
           "human_review_required"
         ],
         "properties": {
@@ -136,6 +137,21 @@
           "evidence": { "type": "string", "minLength": 1 },
           "severity": { "enum": ["info", "warning", "error"] },
           "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "standard_reference": {
+            "type": "object",
+            "required": ["standard_code", "title", "source_url", "local_source_path", "local_source_sha256", "evidence_status", "clause_number", "source_quote_short"],
+            "properties": {
+              "standard_code": { "type": "string", "minLength": 1 },
+              "title": { "type": "string", "minLength": 1 },
+              "source_url": { "type": "string", "format": "uri" },
+              "local_source_path": { "type": "string", "minLength": 1 },
+              "local_source_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "evidence_status": { "enum": ["metadata_only", "local_mirror_human_review", "full_text_verified"] },
+              "clause_number": { "type": ["string", "null"] },
+              "source_quote_short": { "type": ["string", "null"] }
+            },
+            "additionalProperties": false
+          },
           "human_review_required": { "const": true }
         },
         "additionalProperties": false

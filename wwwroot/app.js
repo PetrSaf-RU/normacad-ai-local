@@ -12,8 +12,6 @@ const sourcesList = document.querySelector("#sourcesList");
 const modelName = document.querySelector("#modelName");
 const serverPill = document.querySelector("#serverPill");
 const submitButton = document.querySelector(".submit-button");
-const philosopherToggle = document.querySelector("#philosopherToggle");
-const philosopherInput = document.querySelector("#philosopherInput");
 const taskProgress = document.querySelector("#taskProgress");
 const progressFill = document.querySelector("#progressFill");
 const progressLabel = document.querySelector("#progressLabel");
@@ -201,16 +199,6 @@ function updateFileLabel() {
     fileMeta.textContent = formatBytes(file.size);
 }
 
-function setPhilosopherMode(enabled) {
-    philosopherInput.value = enabled ? "1" : "0";
-    philosopherToggle.classList.toggle("is-active", enabled);
-    philosopherToggle.setAttribute("aria-pressed", String(enabled));
-}
-
-philosopherToggle.addEventListener("click", () => {
-    setPhilosopherMode(philosopherInput.value !== "1");
-});
-
 fileInput.addEventListener("change", updateFileLabel);
 
 ["dragenter", "dragover"].forEach((eventName) => {
@@ -266,7 +254,7 @@ form.addEventListener("submit", async (event) => {
         modelName.textContent = data.model || "qwen2.5-coder:7b";
         serverPill.innerHTML = `<span class="live-dot"></span> Ollama · ${escapeHtml(data.server.replace("http://", ""))}`;
         finishProgress(true, "Задача выполнена");
-        setStatus("done", data.philosopher_mode ? "Ответ философа получен" : "Ответ получен");
+        setStatus("done", "Ответ получен");
     } catch (error) {
         answerText.textContent = error.message;
         renderFiles([]);
@@ -287,5 +275,4 @@ localPathInput.addEventListener("input", () => {
     }
 });
 
-setPhilosopherMode(false);
 resetIdleTimer();

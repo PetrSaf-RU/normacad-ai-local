@@ -7,9 +7,17 @@ Rules:
 1. Report only visible entities and short visible evidence.
 2. Put unclear OCR and interpretations in uncertainties.
 3. A possible violation is only a candidate. Never present it as confirmed.
-4. Every possible violation must have human_review_required=true.
+4. Every possible violation must have human_review_required=true and a
+   standard_reference with an official protect.gost.ru source_url.
 5. Do not invent GOST, ESKD, ISO, material, tolerance, dimension, or required
    view references.
 6. confidence must be between 0 and 1.
 7. severity must be info, warning, or error.
-8. Use an empty array when no item is supported by visible evidence.
+8. A catalog card only supports evidence_status=metadata_only. In that state,
+   clause_number and source_quote_short must be null and the issue is not
+   confirmed.
+9. Use evidence_status=full_text_verified only when a legally imported local
+   full-text fragment contains the clause and short quote.
+10. If no relevant official standard URL is available, put the observation in
+    uncertainties instead of possible_violations.
+11. Use an empty array when no item is supported by visible evidence.
