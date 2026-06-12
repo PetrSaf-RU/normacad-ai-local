@@ -169,6 +169,11 @@ sealed class StandardsService
                     imported_at TEXT NOT NULL
                 );
                 """);
+            await EnsureColumnAsync(connection, "standards", "status", "TEXT NOT NULL DEFAULT 'unknown'");
+            await EnsureColumnAsync(connection, "standards", "source_kind", "TEXT NOT NULL DEFAULT 'unknown'");
+            await EnsureColumnAsync(connection, "standards", "verified_at", "TEXT");
+            await EnsureColumnAsync(connection, "standards", "scope", "TEXT");
+            await EnsureColumnAsync(connection, "standards", "keywords", "TEXT");
             await ExecuteAsync(connection, """
                 CREATE VIRTUAL TABLE IF NOT EXISTS standards_fts USING fts5(
                     standard_id UNINDEXED,
@@ -221,6 +226,10 @@ sealed class StandardsService
             var code = cells[0].Trim();
             var title = cells[1].Trim();
             var url = cells.Count > 2 ? cells[2].Trim() : "";
+            var status = cells.Count > 3 ? cells[3].Trim() : "unknown";
+            var scope = cells.Count > 4 ? cells[4].Trim() : "";
+            var keywords = cells.Count > 5 ? cells[5].Trim() : "";
+            var verifiedAt = cells.Count > 6 ? cells[6].Trim() : "";
             if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(title))
             {
                 continue;
@@ -229,20 +238,79 @@ sealed class StandardsService
             var id = "catalog:" + Sha256Text(code.ToUpperInvariant());
             await using var command = connection.CreateCommand();
             command.CommandText = """
-                INSERT INTO standards (id, code, title, source_path, source_url, content_hash, has_full_text, imported_at)
-                VALUES ($id, $code, $title, NULL, $url, '', 0, $imported_at)
+                INSERT INTO standards (
+                    id, code, title, source_path, source_url, content_hash,
+                    has_full_text, imported_at, status, source_kind,
+                    verified_at, scope, keywords
+                )
+                VALUES (
+                    $id, $code, $title, NULL, $url, '', 0, $imported_at,
+                    $status, 'rosstandart_catalog', $verified_at, $scope, $keywords
+                )
                 ON CONFLICT(id) DO UPDATE SET
                     code = excluded.code,
                     title = excluded.title,
-                    source_url = excluded.source_url
+                    source_url = excluded.source_url,
+                    status = excluded.status,
+                    source_kind = excluded.source_kind,
+                    verified_at = excluded.verified_at,
+                    scope = excluded.scope,
+                    keywords = excluded.keywords
                 """;
             command.Parameters.AddWithValue("$id", id);
             command.Parameters.AddWithValue("$code", code);
             command.Parameters.AddWithValue("$title", title);
             command.Parameters.AddWithValue("$url", string.IsNullOrWhiteSpace(url) ? DBNull.Value : url);
+            command.Parameters.AddWithValue("$status", string.IsNullOrWhiteSpace(status) ? "unknown" : status);
+            command.Parameters.AddWithValue("$scope", string.IsNullOrWhiteSpace(scope) ? DBNull.Value : scope);
+            command.Parameters.AddWithValue("$keywords", string.IsNullOrWhiteSpace(keywords) ? DBNull.Value : keywords);
+            command.Parameters.AddWithValue("$verified_at", string.IsNullOrWhiteSpace(verifiedAt) ? DBNull.Value : verifiedAt);
             command.Parameters.AddWithValue("$imported_at", DateTimeOffset.UtcNow.ToString("O"));
             await command.ExecuteNonQueryAsync();
+
+            await using var deleteMetadata = connection.CreateCommand();
+            deleteMetadata.CommandText = "DELETE FROM standards_fts WHERE standard_id = $id AND chunk_index = -1";
+            deleteMetadata.Parameters.AddWithValue("$id", id);
+            await deleteMetadata.ExecuteNonQueryAsync();
+
+            var metadataText = $"""
+                Официальная карточка Росстандарта. Статус: {status}.
+                Область применения: {scope}
+                Ключевые слова: {keywords}
+                Полный текст в локальную базу не импортирован. Номера пунктов и конкретные нормативные требования по этой записи подтверждать нельзя.
+                """;
+            await using var insertMetadata = connection.CreateCommand();
+            insertMetadata.CommandText = """
+                INSERT INTO standards_fts (standard_id, chunk_index, code, title, text)
+                VALUES ($id, -1, $code, $title, $text)
+                """;
+            insertMetadata.Parameters.AddWithValue("$id", id);
+            insertMetadata.Parameters.AddWithValue("$code", code);
+            insertMetadata.Parameters.AddWithValue("$title", title);
+            insertMetadata.Parameters.AddWithValue("$text", metadataText);
+            await insertMetadata.ExecuteNonQueryAsync();
         }
+    }
+
+    private static async Task EnsureColumnAsync(
+        SqliteConnection connection,
+        string table,
+        string column,
+        string definition)
+    {
+        await using var check = connection.CreateCommand();
+        check.CommandText = $"PRAGMA table_info({table})";
+        await using var reader = await check.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            if (string.Equals(reader.GetString(1), column, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+        }
+
+        await reader.CloseAsync();
+        await ExecuteAsync(connection, $"ALTER TABLE {table} ADD COLUMN {column} {definition}");
     }
 
     private async Task<bool> ImportFileAsync(string file)
